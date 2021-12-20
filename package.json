@@ -1,0 +1,39 @@
+{
+  "name": "jest-environment-vscode-extension",
+  "version": "0.0.1",
+  "license": "MIT",
+  "publisher": "macabeus",
+  "repository": "https://github.com/macabeus/jest-environment-vscode",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint ."
+  },
+  "bin": {
+    "insert-monkey-patch-allow-mocks": "cli/insert-monkey-patch-allow-mocks.js",
+    "vscode-electron-starter": "cli/vscode-electron-starter.js",
+    "vscode-tests-runner": "cli/vscode-tests-runner.js"
+  },
+  "main": "./build/index.js",
+  "exports": {
+    ".": "./build/index.js",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@vscode/test-electron": "2.0.0",
+    "jest-environment-node": "27.4.4",
+    "dedent-js": "1.0.1",
+    "lodash": "4.17.21"
+  },
+  "devDependencies": {
+    "@jest/types": "27.1.0",
+    "@types/vscode": "1.50.0",
+    "@types/lodash": "4.14.172",
+    "@typescript-eslint/parser": "5.8.0",
+    "@typescript-eslint/eslint-plugin": "5.8.0",
+    "eslint": "8.5.0",
+    "typescript": "4.5.4"
+  },
+  "peerDependencies": {
+    "jest": "*"
+  }
+}

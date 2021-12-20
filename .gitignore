@@ -1,0 +1,4 @@
+.vscode
+*.tsbuildinfo
+node_modules
+build
