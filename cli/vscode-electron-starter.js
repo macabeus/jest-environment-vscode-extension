@@ -2,6 +2,7 @@
 const path = require('path')
 const { runTests } = require('@vscode/test-electron')
 const insertMonkeyPatchAllowMocks = require('./insert-monkey-patch-allow-mocks')
+const dropMonkeyPatchAllowMocks = require('./drop-monkey-patch-allow-mocks')
 
 const runNoWorkspace = async ({ extensionDevelopmentPath, extensionTestsPath, version }) => {
 	await runTests({
@@ -51,6 +52,8 @@ const start = async () => {
 		console.error('Failed to run tests')
 		console.log(err)
 		process.exit(1)
+  } finally {
+    dropMonkeyPatchAllowMocks(extensionDevelopmentPath)
 	}
 }
 

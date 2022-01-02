@@ -53,13 +53,33 @@ npm install jest jest-environment-vscode-extension @types/jest @types/jest-envir
   },
 },
 {
-  "label": "before-run-tests",
+  "label": "drop-monkey-patch-allow-mocks",
+  "type": "shell",
+  "command": "node ./node_modules/.bin/drop-monkey-patch-allow-mocks ${workspaceFolder}",
+  "presentation": {
+    "reveal": "silent",
+    "revealProblems": "onProblem"
+  }
+},
+{
+  "label": "pre-run-tests",
   "dependsOrder": "sequence",
   "dependsOn": [
     "remove-test-workspace-folder",
     "create-test-workspace-folder",
     "build",
     "insert-monkey-patch-allow-mocks"
+  ],
+  "presentation": {
+    "reveal": "silent",
+    "revealProblems": "onProblem"
+  }
+},
+{
+  "label": "post-run-tests",
+  "dependsOn": [
+    "remove-test-workspace-folder",
+    "drop-monkey-patch-allow-mocks"
   ],
   "presentation": {
     "reveal": "silent",
@@ -73,7 +93,8 @@ npm install jest jest-environment-vscode-extension @types/jest @types/jest-envir
 ```json
 {
   "name": "Test Extension - No Workspace",
-  "preLaunchTask": "before-run-tests",
+  "preLaunchTask": "pre-run-tests",
+  "postDebugTask": "post-run-tests",
   "type": "extensionHost",
   "request": "launch",
   "runtimeExecutable": "${execPath}",
@@ -90,8 +111,8 @@ npm install jest jest-environment-vscode-extension @types/jest @types/jest-envir
 },
 {
   "name": "Test Extension - With Workspace",
-  "preLaunchTask": "before-run-tests",
-  "postDebugTask": "remove-test-workspace-folder",
+  "preLaunchTask": "pre-run-tests",
+  "postDebugTask": "post-run-tests",
   "type": "extensionHost",
   "request": "launch",
   "runtimeExecutable": "${execPath}",
