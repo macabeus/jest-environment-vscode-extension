@@ -144,11 +144,11 @@ Running by VSCode is great for development since it's quick and can use breakpoi
 1 - On `package.json`, add the following within the `scripts` object:
 
 ```json
-"tests:ci:no-workspace": "vscode-electron-starter no-workspace $INIT_CWD insiders",
-"tests:ci:with-workspace": "vscode-electron-starter with-workspace $INIT_CWD insiders"
+"tests:ci:no-workspace": "vscode-electron-starter no-workspace $INIT_CWD insiders out/tests/no-workspace",
+"tests:ci:with-workspace": "vscode-electron-starter with-workspace $INIT_CWD insiders out/tests/with-workspace"
 ```
 
-The latest parameter is the VSCode version being used. You can use `stable`, `insiders`, or a version number (e.g., `1.32.0`)
+The penultimate parameter is the VSCode version being used. You can use `stable`, `insiders`, or a version number (e.g., `1.32.0`). The last parameter is the path of the test.
 
 2 - Now you can call these scripts on CI. Following, a script to run on GitHub actions:
 
