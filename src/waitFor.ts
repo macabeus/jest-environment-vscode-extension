@@ -1,70 +1,31 @@
-import { workspace, window, Uri } from 'vscode'
+const timeout = 4_500
 
-const timeout = 2000
-
-const loopDocumentChangeCheck = async (
+const loopWaitFor = async <T>(
   startedAt: number,
-  uri: Uri,
-  originalText: string,
-  onChange: (currentText: string) => void,
-  onTimeout: (currentText: string) => void
+  callback: () => T | Promise<T>,
+  onResolve: (result: T) => void,
+  onTimeout: (error: Error) => void
 ) => {
-  const doc = await workspace.openTextDocument(uri)
-  const textEditor = await window.showTextDocument(doc)
-  const text = textEditor.document.getText()
+  try {
+    const result = await callback()
 
-  if (text !== originalText) {
-    onChange(text)
-    return
+    onResolve(result)
+  } catch {
+    if ((new Date().getTime()) > (startedAt + timeout)) {
+      onTimeout(new Error('Timeout on waitFor'))
+      return
+    }
+
+    setTimeout(() => {
+      loopWaitFor(startedAt, callback, onResolve, onTimeout)
+    }, 250)
   }
-
-  if (
-    (new Date().getTime()) > (startedAt + timeout)
-  ) {
-    onTimeout(text)
-    return
-  }
-
-  setTimeout(() => {
-    loopDocumentChangeCheck(startedAt, uri, originalText, onChange, onTimeout)
-  }, 250)
 }
 
-const documentChange = (uri: Uri) => {
-  return new Promise<string>(async (resolve, reject) => {
-    const doc = await workspace.openTextDocument(uri)
-    const textEditor = await window.showTextDocument(doc)
-    const originalText = textEditor.document.getText()
-
-    loopDocumentChangeCheck(
-      (new Date()).getTime(),
-      uri,
-      originalText,
-      resolve,
-      () => reject(new Error('Unexpected document change'))
-    )
+const waitFor = <T>(callback: () => T | Promise<T>): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    loopWaitFor((new Date()).getTime(), callback, resolve, reject)
   })
 }
 
-const notDocumentChange = (uri: Uri) => {
-  return new Promise<string>(async (resolve, reject) => {
-    const doc = await workspace.openTextDocument(uri)
-    const textEditor = await window.showTextDocument(doc)
-    const originalText = textEditor.document.getText()
-
-    loopDocumentChangeCheck(
-      (new Date()).getTime(),
-      uri,
-      originalText,
-      () => reject(new Error('Expected document change')),
-      resolve
-    )
-  })
-}
-
-export default {
-  documentChange,
-  not: {
-    documentChange: notDocumentChange,
-  },
-}
+export default waitFor
