@@ -221,7 +221,10 @@ Our most useful function.
 
 It creates the files and, optionally, can mock VSCode's functions. It receives a callback and, when it's finished, clear the files and mocks.
 
+#### Files
+
 You can create as many files as needed, and their URI is sent to the callback:
+
 ```js
 using(
   {
@@ -239,7 +242,9 @@ using(
 )
 ```
 
-Unfortunately, there are some VSCode features in which we can't manipulate, such as the `window.showQuickPick`. But no worries! We can easily mock it:
+#### Mocks
+
+There are some VSCode features in which we can't manipulate, such as the `window.showQuickPick`. But no worries! We can easily mock it:
 
 ```js
 using(
@@ -258,6 +263,32 @@ using(
 ```
 
 Now, if the extension calls `window.showQuickPick` it'll return `Promise<'My Option'>`.
+
+But there is a rule to use mocks: You should ensure that the extension is initialized. For example, let's say that your extension is initialized only when there is a `.ml` file in the workspace:
+
+```json
+"activationEvents": [
+  "workspaceContains:**/*.ml"
+]
+```
+
+So you should run the tests using workspace and create at least one `.ml` file:
+
+```js
+using(
+  {
+    files: {
+      'main.ml': 'let hello () = print_endline "hey there"',
+    },
+    mocks: {
+      'window.showQuickPick': async () => 'My Option',
+    },
+  },
+  async (mapFilenameToUri) => {
+
+  }
+)
+```
 
 ### `dedent`
 
