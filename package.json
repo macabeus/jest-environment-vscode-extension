@@ -9,6 +9,7 @@
     "lint": "eslint ."
   },
   "bin": {
+    "drop-monkey-patch-allow-mocks": "cli/drop-monkey-patch-allow-mocks.js",
     "insert-monkey-patch-allow-mocks": "cli/insert-monkey-patch-allow-mocks.js",
     "vscode-electron-starter": "cli/vscode-electron-starter.js",
     "vscode-tests-runner": "cli/vscode-tests-runner.js"
