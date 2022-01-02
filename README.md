@@ -326,33 +326,37 @@ It exposes many helper functions to take values from the VSCode. Just use TypeSc
 
 ### `waitFor`
 
-It exposes helper functions to wait for something.
+It exposes a helper function to wait for something.
 
-For example, if you want to test a code action changing something asyncly, you can do that:
+For example, if your extension takes time to initialize, it can be useful:
 
 ```js
-it('generate boilerplate', () => {
-  return using(
-    {
-      files: {
-        'index.js': '',
-      },
-      mocks: {
-        'window.showQuickPick': async () => undefined,
-      },
-    },
-    async (mapFilenameToUri) => {
-      const codeActions = await take.codeActions(
-        mapFilenameToUri['index.js'],
-        new Range(new Position(0, 0), new Position(0, 0))
-      )
+const waitForDocumentSymbols = async (uri, position) => {
+  return await waitFor(async () => {
+    const hovers = await take.hovers(uri, position)
+    expect(hovers).toHaveLength(1)
+    return hovers
+  })
+}
 
-      await codeActions['Make boilerplate']()
+describe("#Document Symbol", () => {
+  it("includes function declaration", () => {
+    return using(
+      {
+        files: {
+          'main.ml': 'let hello () = print_endline "hey there"',
+        },
+      },
+      async (mapFilenameToUri) => {
+        const symbols = await waitForDocumentSymbols(mapFilenameToUri['main.ml'])
 
-      const currentText = await waitFor.documentChange(mapFilenameToUri['index.js'])
-      expect(currentText).toBe('"my boilerplate";')
-    }
-  )
+        expect(symbols[0]).toMatchObject({
+            name: 'hello',
+            detail: 'unit -> unit',
+        })
+      }
+    )
+  })
 })
 ```
 
