@@ -1,14 +1,26 @@
 #!/usr/bin/env node
 const path = require('path')
+const os = require('os')
 const { runTests } = require('@vscode/test-electron')
 const insertMonkeyPatchAllowMocks = require('./insert-monkey-patch-allow-mocks')
 const dropMonkeyPatchAllowMocks = require('./drop-monkey-patch-allow-mocks')
+
+const getRandomTempDiretory = () => {
+  const timestamp = Date.now()
+  const folderName = `test-extension-${timestamp}`
+  const tempPath = path.resolve(os.tmpdir(), folderName)
+
+  return tempPath
+}
 
 const runNoWorkspace = async ({ extensionDevelopmentPath, extensionTestsPath, version, testsPath }) => {
 	await runTests({
     version,
 		extensionDevelopmentPath,
 		extensionTestsPath,
+    launchArgs: [
+      `--user-data-dir=${getRandomTempDiretory()}`,
+    ],
 		extensionTestsEnv: {
 			VSCODE_TESTS_PATH: path.resolve(extensionDevelopmentPath, testsPath),
 		},
@@ -24,6 +36,7 @@ const runWithWorkspace = async ({ extensionDevelopmentPath, extensionTestsPath, 
 		extensionTestsPath,
     launchArgs: [
       testWorkspace,
+      `--user-data-dir=${getRandomTempDiretory()}`,
     ],
 		extensionTestsEnv: {
 			VSCODE_TESTS_PATH: path.resolve(extensionDevelopmentPath, testsPath),
