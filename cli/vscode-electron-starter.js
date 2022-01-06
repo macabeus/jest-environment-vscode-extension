@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const path = require('path')
+const fs = require('fs')
 const os = require('os')
 const { runTests } = require('@vscode/test-electron')
 const insertMonkeyPatchAllowMocks = require('./insert-monkey-patch-allow-mocks')
@@ -44,6 +45,13 @@ const runWithWorkspace = async ({ extensionDevelopmentPath, extensionTestsPath, 
 	})
 }
 
+const recreateTestWorkspaceFolder = (extensionDevelopmentPath) => {
+  const testWorkspacePath = path.resolve(extensionDevelopmentPath, "test-workspace")
+
+  fs.rmSync(testWorkspacePath, { force: true, recursive: true })
+  fs.mkdirSync(testWorkspacePath, { recursive: true })
+}
+
 const start = async () => {
   const [testScenery, version, testsPath] = [process.argv[2], process.argv[3], process.argv[4]]
   const extensionDevelopmentPath = process.cwd()
@@ -53,6 +61,7 @@ const start = async () => {
     'node_modules/.bin/vscode-tests-runner'
   )
 
+  recreateTestWorkspaceFolder(extensionDevelopmentPath)
   insertMonkeyPatchAllowMocks(extensionDevelopmentPath)
   
 	try {
