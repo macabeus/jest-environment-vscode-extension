@@ -32,12 +32,8 @@ const runWithWorkspace = async ({ extensionDevelopmentPath, extensionTestsPath, 
 }
 
 const start = async () => {
-  const [
-    testScenery,
-    extensionDevelopmentPath,
-    version,
-    testsPath,
-  ] = [process.argv[2], process.argv[3], process.argv[4], process.argv[5]]
+  const [testScenery, version, testsPath] = [process.argv[2], process.argv[3], process.argv[4]]
+  const extensionDevelopmentPath = process.cwd()
 
   const extensionTestsPath = path.resolve(
     extensionDevelopmentPath,
