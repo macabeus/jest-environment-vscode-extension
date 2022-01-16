@@ -1,5 +1,6 @@
 import { commands, Position, Uri, workspace, WorkspaceEdit } from 'vscode'
 import * as path from 'path'
+import { readdirSync, rmSync } from 'fs'
 import mapValues from 'lodash/mapValues'
 
 type UsingFiles = <Files extends { [filename: string]: string }>(
@@ -10,7 +11,16 @@ type UsingFiles = <Files extends { [filename: string]: string }>(
   }) => Promise<void>
 ) => Promise<void>
 
+const removeWorkspaceTestContent = (workspacePath: string) => {
+  readdirSync(workspacePath).forEach((filename) => {
+    const fullPath = path.resolve(workspacePath, filename)
+    rmSync(fullPath, { force: true, recursive: true })
+  })
+}
+
 const usingFiles: UsingFiles = async (workspacePath, files, closure) => {
+  removeWorkspaceTestContent(workspacePath)
+
   const mapFilenameToUri = mapValues(
     files,
     (_content, filename) => Uri.file(path.join(workspacePath, filename))
