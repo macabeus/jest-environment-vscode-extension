@@ -1,6 +1,6 @@
 {
   "name": "jest-environment-vscode-extension",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "publisher": "macabeus",
   "repository": "https://github.com/macabeus/jest-environment-vscode",
