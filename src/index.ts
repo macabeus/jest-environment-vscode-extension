@@ -1,6 +1,6 @@
 import NodeEnvironment from 'jest-environment-node'
 import type { Config } from '@jest/types'
-import type { Uri } from 'vscode'
+import type { TextDocument } from 'vscode'
 import * as vscode from 'vscode'
 import * as path from 'path'
 import dedent from 'dedent-js'
@@ -17,7 +17,7 @@ type Using = <Files extends { [filename: string]: string }>(
     }
   },
   closure: (mapFileToUri: {
-    [filename in keyof Files]: Uri
+    [filename in keyof Files]: TextDocument
   }) => Promise<void>
 ) => Promise<void>
 
@@ -31,7 +31,7 @@ class VsCodeExtensionEnvironment extends NodeEnvironment {
       usingFiles(
         workspacePath,
         files,
-        (mapFilenameToUri) => usingMocks(mocks, () => closure(mapFilenameToUri))
+        (mapFileToDoc) => usingMocks(mocks, () => closure(mapFileToDoc))
       )
 
     this.global.vscode = vscode
