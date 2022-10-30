@@ -1,13 +1,38 @@
-import { commands, Position, Uri, workspace, WorkspaceEdit } from 'vscode'
+import { window, Range, commands, Position, TextDocument, Uri, workspace, WorkspaceEdit } from 'vscode'
 import * as path from 'path'
 import { readdirSync, rmSync } from 'fs'
 import mapValues from 'lodash/mapValues'
 
+/**
+ * Try to run a VS Code feature on the files.
+ * It's necessary because sometimes the files are created but can't be used instantially.
+ */
+const warmUpFiles = (mapFileToDoc: { [filename: string]: TextDocument }): Promise<void> =>
+  new Promise(async (resolve) => {
+    try {
+      for (const file in mapFileToDoc) {
+        const doc = mapFileToDoc[file]
+        await window.showTextDocument(doc)
+
+        // run code active to ensure that the file is ready
+        await commands.executeCommand(
+          'vscode.executeCodeActionProvider',
+          doc.uri,
+          new Range(new Position(0, 0), new Position(0, 0))
+        )
+      }
+    } catch {
+      await warmUpFiles(mapFileToDoc)
+    }
+
+    resolve()
+  })
+
 type UsingFiles = <Files extends { [filename: string]: string }>(
   workspacePath: string,
   files: Files,
-  closure: (mapFileToUri: {
-    [filename in keyof Files]: Uri
+  closure: (mapFileToDoc: {
+    [filename in keyof Files]: TextDocument
   }) => Promise<void>
 ) => Promise<void>
 
@@ -37,9 +62,18 @@ const usingFiles: UsingFiles = async (workspacePath, files, closure) => {
   await workspace.applyEdit(weCreateFiles)
   await workspace.saveAll()
 
+  const mapFileToDoc: { [filename: string]: TextDocument } = {}
+  for (const filename in mapFilenameToUri) {
+    mapFileToDoc[filename] = await workspace.openTextDocument(mapFilenameToUri[filename])
+  }
+
+  await warmUpFiles(mapFileToDoc)
+
   // call closure
   try {
-    await closure(mapFilenameToUri)
+    await closure(mapFileToDoc as {
+      [filename in keyof typeof files]: TextDocument
+    })
   } finally {
     // close and delete the files created
     await commands.executeCommand('workbench.action.closeAllEditors')

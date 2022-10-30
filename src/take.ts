@@ -1,10 +1,9 @@
-import { window, commands, CodeAction, workspace, Uri, Range, Hover, Position, SymbolInformation, Location, LocationLink } from 'vscode'
+import { window, commands, CodeAction, workspace, Uri, Range, Hover, Position, SymbolInformation, Location, LocationLink, TextDocument } from 'vscode'
 
-const codeActions = async (uri: Uri, range: Range) => {
-  const doc = await workspace.openTextDocument(uri)
+const codeActions = async (doc: TextDocument, range: Range) => {
   await window.showTextDocument(doc)
 
-  const rawCodeActions = await commands.executeCommand('vscode.executeCodeActionProvider', uri, range) as CodeAction[]
+  const rawCodeActions = await commands.executeCommand('vscode.executeCodeActionProvider', doc.uri, range) as CodeAction[]
 
   const codeActions = rawCodeActions.reduce((acc, codeAction) => {
     const { command: codeActionCommand } = codeAction
@@ -20,37 +19,33 @@ const codeActions = async (uri: Uri, range: Range) => {
   return codeActions
 }
 
-const definitions = async (uri: Uri, position: Position) => {
-  const doc = await workspace.openTextDocument(uri)
+const definitions = async (doc: TextDocument, position: Position) => {
   await window.showTextDocument(doc)
 
-  const definitions = await commands.executeCommand('vscode.executeDefinitionProvider', uri, position) as Array<Location | LocationLink>
+  const definitions = await commands.executeCommand('vscode.executeDefinitionProvider', doc.uri, position) as Array<Location | LocationLink>
 
   return definitions
 }
 
-const hovers = async (uri: Uri, position: Position) => {
-  const doc = await workspace.openTextDocument(uri)
+const hovers = async (doc: TextDocument, position: Position) => {
   await window.showTextDocument(doc)
 
-  const hovers = await commands.executeCommand('vscode.executeHoverProvider', uri, position) as Hover[]
+  const hovers = await commands.executeCommand('vscode.executeHoverProvider', doc.uri, position) as Hover[]
 
   const hoversContent = hovers.flatMap((hover) => hover.contents.map(content => (content as { value: string }).value))
 
   return hoversContent
 }
 
-const documentSymbols = async (uri: Uri) => {
-  const doc = await workspace.openTextDocument(uri)
+const documentSymbols = async (doc: TextDocument) => {
   await window.showTextDocument(doc)
 
-  const documentSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as SymbolInformation[]
+  const documentSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', doc.uri) as SymbolInformation[]
 
   return documentSymbols
 }
 
-const documentText = async (uri: Uri) => {
-  const doc = await workspace.openTextDocument(uri)
+const documentText = async (doc: TextDocument) => {
   const textDocument = await window.showTextDocument(doc)
   const text = textDocument.document.getText()
 

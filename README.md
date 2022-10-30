@@ -214,9 +214,9 @@ describe('#Definition', () => {
           console.log(x)
         `),
       }},
-      async (mapFileToUri) => {
+      async (mapFileToDoc) => {
         // on the file `index.js`, take the definitions at 1:12 (the `x` within the `console.log`)
-        const definitions = await take.definitions(mapFileToUri['index.js'], new Position(1, 12))
+        const definitions = await take.definitions(mapFileToDoc['index.js'], new Position(1, 12))
 
         // assert that it's as the expected
         expect(definitions).toHaveLength(1)
@@ -244,7 +244,7 @@ It creates the files and, optionally, can mock VSCode's functions. It receives a
 
 #### Files
 
-You can create as many files as needed, and their URI is sent to the callback:
+You can create as many files as needed, and their [`TextDocument`](https://code.visualstudio.com/api/references/vscode-api#TextDocument) is sent to the callback:
 
 ```js
 using(
@@ -255,10 +255,10 @@ using(
       'bar.js': '2;',
     },
   },
-  async (mapFilenameToUri) => {
-    mapFilenameToUri['index.js'] // URI
-    mapFilenameToUri['foo.js']   // URI
-    mapFilenameToUri['bar.js']   // URI
+  async (mapFileToDoc) => {
+    mapFileToDoc['index.js'] // TextDocument
+    mapFileToDoc['foo.js']   // TextDocument
+    mapFileToDoc['bar.js']   // TextDocument
   }
 )
 ```
@@ -277,7 +277,7 @@ using(
       'window.showQuickPick': async () => 'My Option',
     },
   },
-  async (mapFilenameToUri) => {
+  async (mapFileToDoc) => {
 
   }
 )
@@ -305,7 +305,7 @@ using(
       'window.showQuickPick': async () => 'My Option',
     },
   },
-  async (mapFilenameToUri) => {
+  async (mapFileToDoc) => {
 
   }
 )
@@ -324,7 +324,7 @@ For example, if you want to open and show a document, you should do:
 ```js
 const { workspace, window } = vscode
 
-const doc = await workspace.openTextDocument(mapFileToUri['index.js'])
+const doc = await workspace.openTextDocument(mapFileToDoc['index.js'])
 await window.showTextDocument(doc)
 ```
 
@@ -352,9 +352,9 @@ It exposes a helper function to wait for something.
 For example, if your extension takes time to initialize, it can be useful:
 
 ```js
-const waitForDocumentSymbols = async (uri, position) => {
+const waitForDocumentSymbols = async (doc, position) => {
   return await waitFor(async () => {
-    const hovers = await take.hovers(uri, position)
+    const hovers = await take.hovers(doc, position)
     expect(hovers).toHaveLength(1)
     return hovers
   })
@@ -368,8 +368,8 @@ describe("#Document Symbol", () => {
           'main.ml': 'let hello () = print_endline "hey there"',
         },
       },
-      async (mapFilenameToUri) => {
-        const symbols = await waitForDocumentSymbols(mapFilenameToUri['main.ml'])
+      async (mapFileToDoc) => {
+        const symbols = await waitForDocumentSymbols(mapFileToDoc['main.ml'])
 
         expect(symbols[0]).toMatchObject({
             name: 'hello',
